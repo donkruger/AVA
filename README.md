@@ -1,2 +1,2 @@
 # AVA
-Agentic RAG Artifact for LLM Investment Advice
+An Agentic RAG Artifact for LLM Investment Advice
