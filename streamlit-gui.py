@@ -93,14 +93,15 @@ Do not engage with the user. Simply evaluate the input and return the structured
         llm_response = re.sub("[\n\n]", "\n", response['llm_response'])
         st.write(f"**Evaluation Report:**\n{llm_response}")
 
-        # If the evaluation result indicates a request for investment advice, generate a detailed report
+        # If the evaluation result indicates a request for investment advice, generate a detailed report with state tracking
         if "'Y'" in llm_response:
-            st.write("Generating detailed report...")
-            research_summary = research_example_from_csv()
-            st.write(research_summary)
-            # Generate summarized context from research_summary
-            prompter_conv = Prompt().load_model("gpt-3.5-turbo", api_key=st.session_state['api_key'])
-            report_summary_text = summarize_report(research_summary, prompter_conv)
+            # Display a spinner while generating the report
+            with st.spinner('Generating detailed report...'):
+                research_summary = research_example_from_csv()
+                st.write(research_summary)
+                # Generate summarized context from research_summary
+                prompter_conv = Prompt().load_model("gpt-3.5-turbo", api_key=st.session_state['api_key'])
+                report_summary_text = summarize_report(research_summary, prompter_conv)
             # Now we can continue the conversation, passing report_summary_text
             assistant_response = conversation(user_input, report_summary=report_summary_text)
             return assistant_response
@@ -143,8 +144,10 @@ Important Instructions:
         # Combine mandate as context and the user's input
         conversation_input = f"{agent_0_mandate}\nClient: {user_input}\n\nAgent-0:"
 
-        # Get the response from the model based on the combined input
-        response = prompter.prompt_main(conversation_input)
+        # Display a spinner while the assistant is formulating a response
+        with st.spinner('Formulating response...'):
+            # Get the response from the model based on the combined input
+            response = prompter.prompt_main(conversation_input)
 
         # Clean up the response
         llm_response = re.sub("[\n\n]", "\n", response['llm_response']).strip()
@@ -196,17 +199,12 @@ Important Instructions:
         companies = ct.rows  # Retrieve all rows from the database after insertion
         st.write("\n**Retrieved Companies Data from Database**")
 
-        # Commented out the loading of local models
-        # model = ModelCatalog().load_model("slim-extract-tool", temperature=0.0, sample=False)
-        # model2 = ModelCatalog().load_model("slim-summary-tool", sample=False, temperature=0.0, max_output=200)
-        # model3 = ModelCatalog().load_model("bling-stablelm-3b-tool", sample=False, temperature=0.0)
-    
         # Filter companies with f_score > 8
         filtered_companies = [row for row in companies if float(row.get('f_score', 0)) > 8]
 
         st.write("\n**Companies with F-Score above 8:**")
         st.write(filtered_companies)
-        
+
         research_summary = {}
 
         for row in filtered_companies:
@@ -214,100 +212,58 @@ Important Instructions:
             ticker = row['ticker']
             f_score = row.get('f_score', 'N/A')
             research_summary[company_name] = {}
-            research_summary[company_name]['f_score'] = f_score 
+            research_summary[company_name]['f_score'] = f_score
             st.write(f"\n**Processing company: {company_name} (Ticker: {ticker})**\n")
 
             # Step 1: Use the stock ticker in web service lookup to YFinance
             ticker_core = ticker.split(":")[-1]
 
-            yf = YFinance().get_stock_summary(ticker=ticker_core)
-            st.write(f"**Yahoo Finance stock info for {company_name}:** {yf}")
+            # Display a spinner while fetching data from Yahoo Finance
+            with st.spinner(f'Fetching data for {company_name}...'):
+                yf = YFinance().get_stock_summary(ticker=ticker_core)
+                st.write(f"**Yahoo Finance stock info for {company_name}:** {yf}")
 
-            research_summary[company_name].update({
-                "current_stock_price": yf.get("currentPrice", "N/A"),
-                "high_ltm": yf.get("fiftyTwoWeekHigh", "N/A"),
-                "low_ltm": yf.get("fiftyTwoWeekLow", "N/A"),
-                "trailing_pe": yf.get("trailingPE", "N/A"),
-                "forward_pe": yf.get("forwardPE", "N/A"),
-                "volume": yf.get("volume", "N/A")
-            })
+                research_summary[company_name].update({
+                    "current_stock_price": yf.get("currentPrice", "N/A"),
+                    "high_ltm": yf.get("fiftyTwoWeekHigh", "N/A"),
+                    "low_ltm": yf.get("fiftyTwoWeekLow", "N/A"),
+                    "trailing_pe": yf.get("trailingPE", "N/A"),
+                    "forward_pe": yf.get("forwardPE", "N/A"),
+                    "volume": yf.get("volume", "N/A")
+                })
 
-            yf2 = YFinance().get_financial_summary(ticker=ticker_core)
-            st.write(f"**Yahoo Finance financial info for {company_name}:** {yf2}")
+                yf2 = YFinance().get_financial_summary(ticker=ticker_core)
+                st.write(f"**Yahoo Finance financial info for {company_name}:** {yf2}")
 
-            research_summary[company_name].update({
-                "market_cap": yf2.get("marketCap", "N/A"),
-                "price_to_sales": yf2.get("priceToSalesTrailing12Months", "N/A"),
-                "revenue_growth": yf2.get("revenueGrowth", "N/A"),
-                "ebitda": yf2.get("ebitda", "N/A"),
-                "gross_margin": yf2.get("grossMargins", "N/A"),
-                "currency": yf2.get("currency", "N/A")
-            })
+                research_summary[company_name].update({
+                    "market_cap": yf2.get("marketCap", "N/A"),
+                    "price_to_sales": yf2.get("priceToSalesTrailing12Months", "N/A"),
+                    "revenue_growth": yf2.get("revenueGrowth", "N/A"),
+                    "ebitda": yf2.get("ebitda", "N/A"),
+                    "gross_margin": yf2.get("grossMargins", "N/A"),
+                    "currency": yf2.get("currency", "N/A")
+                })
 
-            yf3 = YFinance().get_company_summary(ticker=ticker_core)
-            st.write(f"**Yahoo Finance company info for {company_name}:** {yf3}")
+                yf3 = YFinance().get_company_summary(ticker=ticker_core)
+                st.write(f"**Yahoo Finance company info for {company_name}:** {yf3}")
 
-            research_summary[company_name].update({
-                "sector": yf3.get("sector", "N/A"),
-                "website": yf3.get("website", "N/A"),
-                "industry": yf3.get("industry", "N/A"),
-                "employees": yf3.get("fullTimeEmployees", "N/A")
-            })
+                research_summary[company_name].update({
+                    "sector": yf3.get("sector", "N/A"),
+                    "website": yf3.get("website", "N/A"),
+                    "industry": yf3.get("industry", "N/A"),
+                    "employees": yf3.get("fullTimeEmployees", "N/A")
+                })
 
-            execs = []
-            if "companyOfficers" in yf3:
-                for entries in yf3["companyOfficers"]:
-                    pay = entries.get("totalPay", "pay-NA")
-                    age = entries.get("age", "age-NA")
-                    execs.append((entries.get("name", "N/A"), entries.get("title", "N/A"), age, pay))
-            research_summary[company_name].update({"officers": execs})
+                execs = []
+                if "companyOfficers" in yf3:
+                    for entries in yf3["companyOfficers"]:
+                        pay = entries.get("totalPay", "pay-NA")
+                        age = entries.get("age", "age-NA")
+                        execs.append((entries.get("name", "N/A"), entries.get("title", "N/A"), age, pay))
+                research_summary[company_name].update({"officers": execs})
 
             # Commented out Wikipedia components
-            # # Step 2: Use extracted company name to lookup in Wikipedia web service - and add background data
-            # output = WikiParser().add_wiki_topic(company_name, target_results=1)
-
-            # # Get company summary from Wikipedia
-            # company_overview = ""
-            # for i, blocks in enumerate(output["blocks"]):
-            #     if i < 3:
-            #         company_overview += blocks["text"]
-
-            # # Call summary model to summarize the first part of the Wikipedia article
-            # st.write(f"-- Calling summary model for {company_name} to summarize the Wikipedia article")
-            # summary = model2.function_call(company_overview, params=["company history (5)"])
-            # st.write(f"-- Slim-summary for {company_name}: {summary}")
-
-            # research_summary[company_name].update({"summary": summary["llm_response"]})
-
-            # # Get founding date from Wikipedia
-            # st.write(f"\n-- Calling extract model to get the founding date of {company_name}")
-            # response = model.function_call(company_overview, params=["founding date"])
-            # st.write(f"-- Founding date for {company_name}: {response}")
-            # founding_date = response["llm_response"].get("founding_date", ["N/A"])
-            # research_summary[company_name].update({"founding_date": founding_date[0] if founding_date else "N/A"})
-
-            # # Get company description from Wikipedia
-            # st.write(f"\n-- Calling extract model for a short company description of {company_name}")
-            # response = model.function_call(company_overview, params=["company description"])
-            # st.write(f"-- Company description for {company_name}: {response}")
-            # company_description = response["llm_response"].get("company_description", ["N/A"])
-            # research_summary[company_name].update({"company_description": company_description[0]})
-
-            # # Ask other questions directly from Wikipedia
-            # st.write(f"\n-- Asking Wikipedia article about the business overview of {company_name}")
-            # response = model3.inference("What is an overview of the company's business?", add_context=company_overview)
-            # st.write(f"-- Business overview for {company_name}: {response}")
-            # research_summary[company_name].update({"business_overview": response["llm_response"]})
-
-            # st.write(f"\n-- Asking Wikipedia article about the origin of {company_name}'s name")
-            # response = model3.inference("What is the origin of the company's name?", add_context=company_overview)
-            # st.write(f"-- Origin of the name for {company_name}: {response}")
-            # research_summary[company_name].update({"origin_of_name": response["llm_response"]})
-
-            # st.write(f"\n-- Asking Wikipedia article about the products of {company_name}")
-            # response = model3.inference("What are the product names?", add_context=company_overview)
-            # st.write(f"-- Products for {company_name}: {response}")
-            # research_summary[company_name].update({"products": response["llm_response"]})
+            # [Rest of your code remains the same]
 
         # Final output
         st.write("\n\n**Step 4 - Completed Research - Summary Output**\n")
@@ -333,10 +289,11 @@ Important Instructions:
             for key, value in details.items():
                 report_text += f"{key}: {value}\n"
             report_text += "\n"
-        # Now use the prompter to generate a summary
-        summary_prompt = f"Please provide a concise summary of the following research report:\n\n{report_text}"
-        response = prompter.prompt_main(summary_prompt)
-        report_summary_text = response['llm_response']
+        # Display a spinner while summarizing the report
+        with st.spinner('Summarizing the report...'):
+            summary_prompt = f"Please provide a concise summary of the following research report:\n\n{report_text}"
+            response = prompter.prompt_main(summary_prompt)
+            report_summary_text = response['llm_response']
         return report_summary_text.strip()
 
     # Process the user input
