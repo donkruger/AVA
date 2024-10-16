@@ -161,7 +161,7 @@ Important Instructions:
         """Processes a CSV of companies, retrieves financial data from Yahoo Finance."""
 
         # Point fp and fn at the file_path of the CSV file
-        fp = "llmware/fast_start/rag_edited"  # Update with the actual CSV file path
+        fp = os.path.dirname(os.path.abspath(__file__))  # Update with the actual CSV file path
         fn = "companies.csv"  # Update this to match your file name
 
         # First analyze the CSV and confirm that the rows and columns are consistently being extracted
