@@ -135,6 +135,7 @@ Each agent has a distinct role:
 ---
 
 ## 🛠️ **Future Work**
+- **Modular Design Pattern**: Segregate agentic mandates into a configurable database and implement classes for enhanced usability and readability.
 - **Enhanced Risk Profiling**: Incorporate advanced risk models.
 - **Expanded Investment Options**: Add support for bonds, ETFs, mutual funds.
 - **Regulatory Compliance**: Ensure features comply with financial regulations.
