@@ -22,17 +22,22 @@ Methods:
   the output, and saving it to the chat history for seamless interaction.
 '''
 
+# utils/conversation_utils.py
+
 import re
 import streamlit as st
 
 class ConversationManager:
-    def conversation(self, user_input, agent_zero, report_summary=None):
-        # Get risk profile report if available
-        risk_profile_report = st.session_state.get('risk_profile_report', None)
-        
+    def conversation(self, user_input, agent_zero, report_summary=None, risk_profile_report=None, fundamentals_report=None, price_chart_note=None):
         # Generate assistant response
-        assistant_response = agent_zero.generate_response(user_input, report_summary, risk_profile_report)
-        
+        assistant_response = agent_zero.generate_response(
+            user_input,
+            report_summary=report_summary,
+            risk_profile_report=risk_profile_report,
+            fundamentals_report=fundamentals_report,
+            price_chart_note=price_chart_note
+        )
+
         # Clean up the response
         assistant_response = re.sub("[\n\n]", "\n", assistant_response).strip()
         st.session_state['messages'].append({"role": "assistant", "content": assistant_response})
@@ -43,3 +48,4 @@ class ConversationManager:
         st.session_state['conversation_history'].append({"role": "assistant", "content": assistant_response})
 
         return assistant_response
+
