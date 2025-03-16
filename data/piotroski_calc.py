@@ -69,6 +69,24 @@ Improved Piotroski F-Score Script
 - Ensures proper alignment of dates across Income Statement, Balance Sheet, Cash Flow
 - Uses ROA > 0 (instead of just net income > 0)
 - Uses (LongTermDebt / TotalAssets) year-over-year comparison
+
+What Changed?
+Common Date Intersection
+We now gather common_dates = set(financials.columns).intersection(...) across all three DataFrames. This ensures the same exact annual period is used for each statement. We then pick the latest two common dates in descending order.
+
+ROA > 0 for the First Criterion
+The original Piotroski approach uses ROA (Return on Assets) > 0 as the profitability measure, not simply Net Income > 0.
+
+Check Decrease in Long-Term Debt Ratio
+Instead of just checking if longTermDebt_t < longTermDebt_t1, the script checks (LTD / Total Assets) this year < (LTD / Total Assets) last year.
+
+No Overwriting of “date_t” across statements
+Because we use the intersection of columns and pick common_dates_sorted[0] and [1], we safely reference the same exact label (e.g. 2022-12-31) in the Income Statement, Balance Sheet, and Cash Flow.
+
+Net Issuance of Stock
+The code still uses issuanceOfStock_t + repurchaseOfStock_t <= 0 as the Piotroski check for “No new shares.” This is standard for an F-score approach using data from the cashflow statement. If you want to use share count changes, you must also fetch the older year’s share count and compare them—but Piotroski’s original measure is simpler and focuses on issuance from the statement of cash flows.
+
+With these tweaks, the script will more faithfully follow Joseph Piotroski’s original 9-point F-score methodology while ensuring correct date alignment from Yahoo Finance’s DataFrames.
 """
 
 script_dir = os.path.dirname(os.path.abspath(__file__))

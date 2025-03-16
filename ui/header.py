@@ -14,24 +14,32 @@ def display_header():
     Displays the header section of the Streamlit app, including the logo, title, and Lottie animation.
     """
     # Import custom font using Google Fonts
-    st.markdown(
-        """
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Sitzer:wght@200&display=swap');
+    
+    # st.markdown(
+    #     """
+    #     <style>
+    #         /* Load font from Google Fonts */
+    #         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap');
 
-            .custom-title {
-                font-family: 'Sitzer', sans-serif;
-                font-size: 2.5rem;
-                font-weight: 200; /* Light weight */
-                background: linear-gradient(to right, #ffc44d, white);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                margin: 7px 0 0 0; /* Shift title down by 5px */
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+    #         /* Apply font to body */
+    #         html, body, [class*="css"] {
+    #             font-family: 'Inter', sans-serif !important;
+    #         }
+
+    #         .custom-title {
+    #             font-family: 'Inter', sans-serif;
+    #             font-size: 2.5rem;
+    #             font-weight: 200; /* Light weight */
+    #             background: linear-gradient(to right, #ffc44d, white);
+    #             -webkit-background-clip: text;
+    #             -webkit-text-fill-color: transparent;
+    #             margin: 7px 0 0 0;
+    #         }
+    #     </style>
+    #     """,
+    #     unsafe_allow_html=True,
+    # )
+    
 
     # Load the Lottie file
     lottie_path = "assets/lottie/Hexagone Loader.json"
