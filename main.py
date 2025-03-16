@@ -665,7 +665,7 @@ if user_input:
     # Process the user input
     process_user_input(user_input)
 
-# main.py, near the bottom or after the user input is processed
+# Risk Profile - Download Button
 if st.session_state.get('risk_profile_report'):
     st.download_button(
         label="Download Risk Profile (JSON)",

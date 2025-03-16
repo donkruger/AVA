@@ -1,120 +1,111 @@
 # AVA 1.7: **Agentic RAG for Equity Investment Advisory**
 
-**AVA 1.7** is an **open-source** application that brings agentic intelligence to **equity investment advisory**. By leveraging **multiple LLMs** and real-time data retrieval (e.g., Yahoo Finance), it delivers **dynamic**, up-to-date stock insights. The system employs **design patterns** like **Chain of Responsibility**, **Factory Method**, **Strategy**, and **Singleton** to ensure **modularity**, **scalability**, and **maintainability**.
+**AVA 1.7** is an **open-source** advisory system that employs **multi-agent Retrieval-Augmented Generation (RAG)** to offer structured, context-enriched, and ethically informed **single-stock investment insights**. Developed around a **directed acyclic graph (DAG)** design, it integrates **live financial data** (via the Yahoo Finance API) with **specialized AI agents**, each with discrete mandates. This architecture is rooted in emerging Design Science principles (Peffers et al. 2007) and addresses critical challenges of LLM-driven finance, including **contextual limitations**, **risk misalignment**, and **hallucinations** (Lewis et al. 2020; Liu et al. 2024).
 
-## Table of Contents
-
-1. [Introduction](#introduction)
-2. [Architecture Overview](#architecture-overview)
-3. [Key Features](#key-features)
-4. [Dependencies](#dependencies)
-5. [Setup Instructions](#setup-instructions)
-6. [Usage Instructions](#usage-instructions)
-7. [Agent Flows](#agent-flows)
-8. [Adding a New Static Pipeline Event](#adding-a-new-static-pipeline-event)
-9. [Customization](#customization)
-10. [Limitations](#limitations)
-11. [Ethical Considerations](#ethical-considerations)
-12. [Future Work](#future-work)
-13. [References](#references)
+> **Disclaimer:** AVA 1.7 demonstrates a _hardcoded financial amalgamation score_ (via Piotroski’s F-score **as an example only**). This score can be substituted with any other valuation or scoring framework—such as GuruFocus metrics or a custom fundamental analysis method. AVA 1.7 does **not** endorse Piotroski F-score as inherently superior and remains **agnostic** to the choice of scoring methodology.
 
 ---
 
-## 1. Introduction
+## 1. Research Motivation & Objectives
 
-**AVA 1.7** focuses on **equity investment advisory** by using a **Retrieval-Augmented Generation (RAG)** pipeline and an **agent-based** architecture. Through real-time data retrieval and structured conversation management, it provides **Piotroski F-score-based** recommendations, personalized risk profiles, price charts, fundamentals, comparative radar charts, and more.
+The financial sector’s embrace of **generative AI** has exposed limitations in traditional, mono-agent LLMs, particularly in high-stakes contexts where external knowledge and real-time data are critical (Lo and Ross 2024). Drawing on the concerns about “lost in the middle” context gaps (Liu et al. 2024) and the documented shortcomings of static AI advisory tools (Fisch et al. 2019), AVA 1.7 adopts a **multi-agent RAG** pipeline to:
+
+1. Distribute financial advisory tasks—such as risk profiling and data retrieval—across specialized AI agents.
+2. Substantiate recommendations through **structured retrieval** of external data (e.g., yFinance).
+3. Embed disclaimers and ethical safeguards into a chain-of-responsibility workflow, promoting transparency and mitigating hallucinations.
+4. Provide **modular scoring** capabilities (illustrated by Piotroski’s score) that can be seamlessly replaced with alternative metrics.
+
+This approach reflects a **Design Science Research** ethos (Peffers et al. 2007), aiming to deliver an artefact that is both theoretically rigorous and practically adaptable.
+
+### **Key Innovations**
+
+- **Multi-Agent RAG:** Segments LLM tasks across agents to diminish cognitive overload (Göldi & Rietsche 2024) and reduce factual inconsistencies.
+- **DAG-Based Architecture** (🧩): Structures agents in a linear flow with no cyclical paths, enhancing scalability and **explainability**.
+- **Live Financial Data Integration:** Uses **yFinance** to ground real-time insights in verifiable market conditions.
+- **Flexible Valuation Models:** Illustrates how a _hardcoded F-score_ can be replaced with **any** alternative scoring technique (traditional or proprietary).
 
 ---
 
 ## 2. Architecture Overview
 
-The system is designed around **four** primary agents, each with a **single responsibility**:
+### **Multi-Agent System & DAG Structure**
 
-1. **Agent Zero (Conversation Agent)**
+**AVA 1.7** comprises four principal agents, each governed by text-based “mandates,” ensuring modularity, transparency, and risk-aware recommendations:
 
-   - The main user-facing agent. Gathers user input, provides rapport, and integrates downstream data into final responses.
+1. **Agent Zero** (User Interaction & Context Manager)
 
-2. **Agent One (Evaluation Agent)**
+   - Captures user prompts and domain-specific needs.
+   - Crafts preliminary instructions for subsequent agents in the DAG.
 
-   - Evaluates and classifies user requests into structured categories (e.g., investment advice, risk profile, fundamentals).
+2. **Agent One** (Classification & Categorization)
 
-3. **Agent Two (Risk Profiling Agent)**
+   - Organizes inputs into structured categories (e.g., _portfolio insights_, _single-stock screening_, _risk assessment_).
+   - Delegates tasks to the appropriate downstream agent.
 
-   - Generates a **JSON**-formatted risk profile report (e.g., `{"risk_ability": "high", ...}`) by analyzing conversation history.
+3. **Agent Two** (Risk Profiling)
+
+   - Generates a JSON-formatted risk profile, e.g. `{ "risk_ability": "medium", ... }`.
+   - Aligns final recommendations with the user’s capacity and willingness to bear risk.
 
 4. **Agent Summarizer**
-   - Condenses the conversation and report history to keep context relevant without exceeding LLM token limits.
+   - Compacts conversation and analysis logs to conserve LLM context window.
+   - Preserves essential details for subsequent queries and disclaimers.
 
-All agents communicate through a **Chain of Responsibility** pattern, ensuring each agent focuses on its own mandate.
+**Chain of Responsibility** and **DAG** principles ensure each agent focuses on specialized tasks, thereby mitigating single-agent overload and “lost context” issues (Liu et al. 2024).
 
 ---
 
 ## 3. Key Features
 
-1. **Multi-Agent Flow**
+1. **Multi-Agent RAG Workflow**
 
-   - Each agent (Zero, One, Two, Summarizer) handles a unique part of the conversation or data processing.
+   - **Task Decomposition:** Agents manage discrete parts of the advisory pipeline.
+   - **Explainability:** Traces each recommendation to agent-level data retrieval and risk classification.
 
-2. **Retrieval-Augmented Generation (RAG)**
+2. **Real-Time Market Integration** (🔎)
 
-   - Integrates real-time data (Yahoo Finance) into LLM responses for **accurate** equity insights.
+   - **yFinance** integration for updated quotes, historical prices, and fundamentals.
+   - Automates the retrieval and parsing of key financial metrics to ground AI in current data.
 
-3. **Structured Risk Profiling**
+3. **Amalgamation Scores & Flexibility**
 
-   - Agent Two returns a strict JSON object for risk tolerance/willingness, with logic to parse it safely.
+   - **Piotroski F-score** is showcased as a _hardcoded example._
+   - Users can easily substitute alternative metrics (e.g., GuruFocus score, ratio-based valuation, or custom fundamentals).
 
-4. **Agent Summarizer**
-
-   - Dynamically shortens conversation context and prior reports to keep tokens within bounds.
-
-5. **Chain of Responsibility**
-
-   - Orchestrates calls among agents in a **linear** yet **modular** pipeline, letting you easily add new steps.
-
-6. **User-Friendly**
-   - Built on Streamlit for an intuitive UI. Prompts for API keys at runtime, offers model dropdowns, and supports easy **risk profile** downloads.
+4. **Ethically Informed Advisory**
+   - **Disclaimers** integrated at each step, cautioning users that final decisions rest with human investors.
+   - Risk-profiling logic ensures alignment with user’s declared preferences and tolerance.
 
 ---
 
 ## 4. Dependencies
 
 - **Python 3.7+**
-- **Streamlit** for UI
-- **Pandas** for CSV handling
-- **YFinance** for real-time stock data
-- **LLMWare Library** (handles LLM prompt management)
-- **OpenAI** or **Anthropic** API Key
+- **Streamlit** (UI)
+- **Pandas** (data manipulation)
+- **YFinance** (real-time market data)
+- **LLMWare** (prompt management & integration with OpenAI/Anthropic APIs)
+- **OpenAI/Anthropic** (LLM endpoints; optional cloud-based or self-hosted models)
 
 ---
 
 ## 5. Setup Instructions
 
 1. **Clone the Repository**
-
    ```bash
-   git clone https://github.com/yourusername/ava-1.7.git
+   git clone https://github.com/<your-username>/ava-1.7.git
    cd ava-1.7
    ```
-
-2. **Create a Virtual Environment**
-
+2. **Create & Activate Virtual Environment**
    ```bash
    python3 -m venv venv
-   source venv/bin/activate
-   # Windows: venv\Scripts\activate
+   source venv/bin/activate  # (Windows: venv\Scripts\activate)
    ```
-
 3. **Install Dependencies**
-
    ```bash
    pip install -r requirements.txt
    ```
-
-4. **Configure API Key**
-
-   - Obtain an OpenAI or Anthropic key and keep it ready. The app prompts you at runtime.
-
-5. **Run the Application**
+4. **Run the Streamlit Application**
    ```bash
    streamlit run main.py
    ```
@@ -123,56 +114,72 @@ All agents communicate through a **Chain of Responsibility** pattern, ensuring e
 
 ## 6. Usage Instructions
 
-1. **Launch the App**
-   - Running `streamlit run main.py` opens the UI in your browser.
-2. **Enter Your API Key**
-   - When prompted, provide the key for your selected model (e.g., GPT-4).
-3. **Select Agent Models**
-   - Configure which model is used for Agent Zero, One, and Two, plus the summarizer, via dropdowns.
-4. **Interact**
-   - Type in the chat. **Agent Zero** responds with equity investment advice or data from other agents.
-5. **Risk Profile**
-   - If you answer risk-related questions, **Agent Two** returns a structured JSON risk profile.
-   - Download your risk profile using the **“Download”** button once generated.
-6. **Charting & Fundamentals**
-   - Ask about a stock’s price or fundamentals to see real-time data from yfinance.
+1. **Start the App**
+   - Launch via `streamlit run main.py`.
+2. **Provide API Keys**
+   - Input relevant OpenAI/Anthropic keys or local model configurations.
+3. **Select Models for Each Agent**
+   - Customize the LLM choice for Agents Zero, One, Two, and Summarizer.
+4. **Interact with AVA 1.7**
+   - Pose investment-related queries and observe the multi-agent synergy in real-time.
+5. **Retrieve Risk Profile**
+   - Download the JSON-based risk report for subsequent analysis or compliance needs.
 
 ---
 
-## 7. Customization
+## 7. Customization & Scalability
 
-- **Add New Agents**: Subclass `AgentBase` in `agents/`, create a new mandate in `prompts/`, then integrate in `main.py`.
-- **Edit Mandates**: The `.txt` prompt files define each agent’s instructions (very easy to tweak).
-- **Adjust Pipeline**: The `main.py` user input processing flow can be modified to skip or reorder agent calls.
+- **Extend Agents:** Add new specialized agents by deriving from `AgentBase` (in `agents/`), then define mandates in the `prompts/` folder.
+- **Adapt Valuation Logic:** Update or replace the Piotroski-based demonstration in `config.py` to incorporate your preferred financial scoring frameworks.
+- **Scale to Production:** Container-friendly and amenable to CI/CD; designed to scale horizontally should the number of agents or data retrieval endpoints expand.
 
 ---
 
 ## 8. Limitations
 
-- **LLM-Dependent**: Responses are bound by the chosen LLM’s reliability and knowledge cutoffs.
-- **Equity-Focused**: Currently specialized in **publicly listed stocks**—other asset classes (e.g., bonds, crypto) are not covered.
-- **Data Delays**: Real-time market data from Yahoo Finance may have slight latency or partial data.
+- **Equity Focus**: Presently optimized for single-stock analysis; expansions for ETFs or bonds are in progress.
+- **Context Boundaries**: Some LLMs have limited context windows, which may constrain deep historical analysis.
+- **Data Latency & Reliability**: Real-time feeds depend on external APIs; data inaccuracies or downtime can affect results.
 
 ---
 
-## 9. Ethical Considerations
+## 9. Ethical Considerations (⚖️)
 
-- **Informational Purposes Only**: AVA 1.7’s recommendations are **not** financial advice—always consult a qualified professional.
-- **User Privacy**: Be mindful when sharing sensitive investment info via the chat.
+- **Not Official Financial Advice**: All outputs serve as informational prompts, underscored by disclaimers in the user flow.
+- **User Privacy**: Minimal data storage; no sensitive personal details are retained.
+- **Transparency & Accountability**: Each chain-of-responsibility output is explained, emphasizing that **human oversight** is indispensable in final decision-making.
 
 ---
 
-## 10. Future Work
+## 10. Future Roadmap
 
-- **Enhanced Summaries**: Expand the Summarizer to handle multiple conversation segments and advanced compression.
-- **Automated KYC**: Integrate optional compliance checks.
-- **Multi-Asset Support**: Extend beyond equities to cover ETFs, bonds, or mutual funds.
-- **Fine-Tuned LLM**: Incorporate domain-specific LLM models for more accurate analysis.
+- **Portfolio-Level Insights**: Transition from single-equity analysis to multi-asset recommendations.
+- **Enhanced Summarization Agents**: Improve efficiency for extended dialogues, addressing context-truncation hazards (Liu et al. 2024).
+- **Multi-Metric Valuation Support**: Broaden _Piotroski only_ demonstration to seamlessly integrate any fundamental or technical scoring method.
+- **Regulatory & Compliance Features**: Integrate advanced KYC modules and ethical safeguards consistent with emerging guidelines (Caton & Haas 2024).
 
 ---
 
 ## 11. References
 
-- **Gamma, E. et al. (1994)**. _Design Patterns: Elements of Reusable Object-Oriented Software._
+- **Peffers, K. et al. (2007)**. _A Design Science Research Methodology for Information Systems Research._
 - **Lewis, P. et al. (2020)**. _Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks._
-- **Piotroski, J.D. (2000)**. _Value Investing: The Use of Historical Financial Statement Information to Separate Winners from Losers._
+- **Liu, N. F. et al. (2024)**. _Lost in the Middle: How Language Models Use Long Contexts._
+- **Lo, A. W. & Ross, J. (2024)**. _Generative AI & Investment Advisory: Bridging Theory and Practice._
+- **Göldi, A. & Rietsche, R. (2024)**. _Making Sense of Large Language Model-Based AI Agents._
+
+_(Full bibliographic details available in the research manuscript.)_
+
+---
+
+### **License**
+
+Released under the **MIT License**, allowing free use, modification, and distribution.
+
+### **Contact & Contributions**
+
+Contributions are warmly encouraged! Please submit a pull request or open an issue on GitHub to propose improvements, share ideas, or report bugs.
+
+---
+
+**© 2025 AVA 1.7** – _Empowering research-based, ethically aligned, and modular AI-driven investment advisory._
