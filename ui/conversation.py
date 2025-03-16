@@ -13,8 +13,13 @@ def initialize_conversation():
     if 'conversation_history' not in st.session_state:
         st.session_state['conversation_history'] = []
 
+    # Keep the raw report (string) ...
     if 'risk_profile_report' not in st.session_state:
         st.session_state['risk_profile_report'] = None
+
+    # ... and the parsed data (dictionary)
+    if 'risk_profile_data' not in st.session_state:
+        st.session_state['risk_profile_data'] = {}
 
     if 'fundamentals_report' not in st.session_state:
         st.session_state['fundamentals_report'] = None
@@ -26,6 +31,7 @@ def initialize_conversation():
         st.session_state['radar_chart_data'] = None
     if 'radar_chart_note' not in st.session_state:
         st.session_state['radar_chart_note'] = None
+
 
 def display_conversation():
     """
@@ -39,6 +45,7 @@ def display_conversation():
             with st.chat_message("assistant"):
                 st.markdown(message['content'])
 
+
 def get_user_input():
     """
     Captures user input from the chat input box.
@@ -47,3 +54,17 @@ def get_user_input():
         str: The user's input message.
     """
     return st.chat_input("Type your message...")
+
+# (Optional) Add a section for downloading the risk profile:
+def display_risk_profile_download():
+    """
+    Displays a download button if a risk profile report is available
+    in session_state['risk_profile_report'].
+    """
+    if st.session_state.get('risk_profile_report'):
+        st.download_button(
+            label="Download Risk Profile (JSON)",
+            data=st.session_state['risk_profile_report'].encode('utf-8'),
+            file_name="risk_profile_report.json",
+            mime="application/json"
+        )

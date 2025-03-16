@@ -1,156 +1,178 @@
+# AVA 1.7: **Agentic RAG for Equity Investment Advisory**
 
-📊 AVA 1.1: An Agentic RAG Artifact for LLM Investment Advice 🤖💰
+**AVA 1.7** is an **open-source** application that brings agentic intelligence to **equity investment advisory**. By leveraging **multiple LLMs** and real-time data retrieval (e.g., Yahoo Finance), it delivers **dynamic**, up-to-date stock insights. The system employs **design patterns** like **Chain of Responsibility**, **Factory Method**, **Strategy**, and **Singleton** to ensure **modularity**, **scalability**, and **maintainability**.
 
-📝 **Introduction**  
-AVA 1.1 is an open-source financial advisory app that redefines equity investment guidance by combining multiple Large Language Models (LLMs) with real-time data retrieval, making it a pioneer in the agentic finance space. Using an innovative agent-based architecture within a Retrieval-Augmented Generation (RAG) pipeline, AVA 1.1 offers dynamically informed, ethically sound investment insights that adapt seamlessly to user needs. Crafted to integrate new agents and mandates effortlessly, AVA 1.1 stands out for its modular, scalable design—perfectly suited for researchers, developers, and financial experts aiming to explore agentic AI’s impact on modern investment advisory.
+## Table of Contents
 
-🏛️ **Architecture Overview**  
-The app utilizes a multi-agent framework organized using design patterns like Factory Method, Strategy, Singleton, and Chain of Responsibility. The key agents are:
+1. [Introduction](#introduction)
+2. [Architecture Overview](#architecture-overview)
+3. [Key Features](#key-features)
+4. [Dependencies](#dependencies)
+5. [Setup Instructions](#setup-instructions)
+6. [Usage Instructions](#usage-instructions)
+7. [Agent Flows](#agent-flows)
+8. [Adding a New Static Pipeline Event](#adding-a-new-static-pipeline-event)
+9. [Customization](#customization)
+10. [Limitations](#limitations)
+11. [Ethical Considerations](#ethical-considerations)
+12. [Future Work](#future-work)
+13. [References](#references)
 
-- **Agent Zero (Conversation Agent)** 🤵: Interacts directly with the user, gathers necessary information, and provides investment advice.
-- **Agent One (Evaluation Agent)** 📊: Analyzes user inputs to categorize them as general inquiries, risk profile answers, or investment advice requests.
-- **Agent Two (Risk Profiling Agent)** 📝: Generates a structured risk profile report based on the conversation history with Agent Zero.
+---
 
-This architecture ensures that each agent has a single responsibility, promoting clean code and easy maintenance. Together, they deliver tailored, accurate advice aligned with your risk tolerance and financial goals. 🎯
+## 1. Introduction
 
-🔑 **Key Features**  
-- **Modular Structure Harnessing Conventional Design Patterns 🧩**: Implements design patterns for scalability and ease of maintenance.
-  - Factory Method: Dynamically creates agents.
-  - Strategy Pattern: Encapsulates mandates and algorithms.
-  - Singleton Pattern: Manages configuration settings.
-  - Chain of Responsibility: Controls the flow between agents.
-- **Agent-Based Interaction 🤖**: Simulates a multi-agent environment where each agent has a specific task, enhancing robustness.
-- **Retrieval-Augmented Generation (RAG) 🔄**: Integrates real-time data sources like Yahoo Finance for accurate, up-to-date advice.
-- **Risk Profiling 📉**: Generates personalized risk profiles to offer advice based on the user’s tolerance and financial situation.
-- **User-Friendly Interface 🖥️**: Built with Streamlit, offering an intuitive user experience.
+**AVA 1.7** focuses on **equity investment advisory** by using a **Retrieval-Augmented Generation (RAG)** pipeline and an **agent-based** architecture. Through real-time data retrieval and structured conversation management, it provides **Piotroski F-score-based** recommendations, personalized risk profiles, price charts, fundamentals, comparative radar charts, and more.
 
-🛠️ **Dependencies**  
-- Python 3.7+
-- Streamlit
-- Pandas
-- YFinance
-- LLMWare Library
-- OpenAI API
+---
 
-🏗️ **Setup Instructions**  
-1️⃣ **Clone the Repository**
-```bash
-git clone https://github.com/yourusername/ava-1.1.git
-cd ava-1.1
-```
+## 2. Architecture Overview
 
-2️⃣ **Create a Virtual Environment**
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-```
+The system is designed around **four** primary agents, each with a **single responsibility**:
 
-3️⃣ **Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
+1. **Agent Zero (Conversation Agent)**
 
-4️⃣ **Set Up OpenAI API Key 🔑**
-Obtain an API key from OpenAI. You’ll be prompted to enter it when running the app.
+   - The main user-facing agent. Gathers user input, provides rapport, and integrates downstream data into final responses.
 
-🚀 **Run the Application**
-```bash
-streamlit run main.py
-```
+2. **Agent One (Evaluation Agent)**
 
-💡 **Usage Instructions**  
-- **Launch the App**: Running the command will open the app in a new browser window.
-- **Enter API Key**: Input your OpenAI API key in the provided field.
-- **Select Models for Agents**: Choose models (e.g., GPT-4, GPT-3.5) for each agent from dropdowns.
-- **Start the Conversation**: Type your messages in the chat input box. Agent Zero will guide you through your investment needs.
-- **Receive Advice**: Request investment advice, and the app will provide recommendations based on Piotroski F-score analysis. 📊
-- **View Risk Profile**: Agent Two generates a risk profile report, viewable in-app.
+   - Evaluates and classifies user requests into structured categories (e.g., investment advice, risk profile, fundamentals).
 
-⚙️ **Underlying Methods**  
+3. **Agent Two (Risk Profiling Agent)**
 
-**Design Patterns Implemented 🧠**
-- **Factory Method Pattern 🏭**: Allows for dynamic creation of agents, facilitating scalability when adding new agents to the system.
-- **Strategy Pattern 🎯**: Encapsulates mandates and algorithms within agent classes, promoting interchangeable behaviors.
-- **Singleton Pattern 🔒**: Ensures only one instance of the configuration manager exists, maintaining consistent settings across the application.
-- **Chain of Responsibility 🔗**: Manages the flow of operations between agents, allowing for flexible pipeline adjustments.
+   - Generates a **JSON**-formatted risk profile report (e.g., `{"risk_ability": "high", ...}`) by analyzing conversation history.
 
-**Agentic Architecture 🤖**  
-Each agent has a distinct role:
-- **Agent Zero**: User interaction & rapport-building.
-- **Agent One**: Input evaluation & routing.
-- **Agent Two**: Risk profile generation.
+4. **Agent Summarizer**
+   - Condenses the conversation and report history to keep context relevant without exceeding LLM token limits.
 
-**Retrieval-Augmented Generation (RAG) 🔄**  
-- **Data Retrieval**: Yahoo Finance provides real-time financial data using the yfinance library.
-- **Data Integration**: The data is merged with the LLM’s responses to give current investment advice.
+All agents communicate through a **Chain of Responsibility** pattern, ensuring each agent focuses on its own mandate.
 
-**Financial Data Processing**  
-- **CSV Processing**: Handles a CSV file with company info and Piotroski F-scores.
-- **Database Integration**: Uses SQLite for efficient data access.
+---
 
-📂 **Code Structure**
-```markdown
-project/
-├── main.py
-├── agents/
-│   ├── __init__.py
-│   ├── agent_base.py
-│   ├── agent_zero.py
-│   ├── agent_one.py
-│   ├── agent_two.py
-│   └── ... (additional agents)
-├── prompts/
-│   ├── __init__.py
-│   ├── agent_zero_mandate.txt
-│   ├── agent_one_mandate.txt
-│   ├── agent_two_mandate.txt
-│   └── ... (additional mandates)
-├── utils/
-│   ├── __init__.py
-│   ├── conversation_utils.py
-│   ├── research_utils.py
-│   ├── risk_profile_utils.py
-│   └── ... (additional utilities)
-├── configs/
-│   ├── __init__.py
-│   └── config.py
-├── data/
-│   └── companies.csv
-└── requirements.txt
-```
+## 3. Key Features
 
-- **main.py**: Main application script orchestrating agents and managers.
-- **agents/**: Contains agent classes, each with a specific responsibility.
-- **prompts/**: Stores mandates for each agent in plain text files for easy editing.
-- **utils/**: Utility modules for conversation management, research processing, and risk profiling.
-- **configs/**: Configuration management using the Singleton pattern.
-- **data/companies.csv**: CSV file with company data and Piotroski F-scores.
+1. **Multi-Agent Flow**
 
-⚒️ **Customization**
-- **Adding New Agents** 🆕: Simply create a new agent class in the agents/ directory, subclassing AgentBase, and add its mandate in the prompts/ directory.
-- **Editing Mandates** 📝: Modify the agent mandates directly in the prompts/ directory for quick updates.
-- **Adjusting Pipeline Flow** 🔄: Modify main.py to change the sequence of agent interactions, thanks to the Chain of Responsibility pattern.
-- **Model Selection** 🎛️: Tailor the models used for each agent to improve performance.
+   - Each agent (Zero, One, Two, Summarizer) handles a unique part of the conversation or data processing.
 
-🚧 **Limitations**
-- **LLM Dependency**: Quality depends on the language model selected.
-- **Data Currency**: There may be delays or inaccuracies in the data retrieved.
-- **Scope**: Currently limited to publicly listed equity investments.
+2. **Retrieval-Augmented Generation (RAG)**
 
-⚖️ **Ethical Considerations**
-- **Financial Responsibility**: Advice is for informational purposes only—please consult a professional for financial decisions.
-- **User Data**: Be cautious about sharing sensitive financial info.
+   - Integrates real-time data (Yahoo Finance) into LLM responses for **accurate** equity insights.
 
-🛠️ **Future Work**
-- **Enhanced Risk Profiling**: Incorporate advanced risk models.
-- **Expanded Investment Options**: Add support for bonds, ETFs, mutual funds.
-- **Regulatory Compliance**: Ensure features comply with financial regulations.
-- **Improved Modularity**: Continue refining the architecture for even greater scalability.
+3. **Structured Risk Profiling**
 
-🎓 **Conclusion**
-AVA 1.1 demonstrates how applying design patterns to an agent-based system within a RAG pipeline can significantly improve scalability and maintainability. It sets a solid foundation for the development of AI-driven financial advisory services in both academic and professional contexts.
+   - Agent Two returns a strict JSON object for risk tolerance/willingness, with logic to parse it safely.
 
-🔍 **References**
-- **Design Patterns**: Gamma, E., Helm, R., Johnson, R., & Vlissides, J. (1994). *Design Patterns: Elements of Reusable Object-Oriented Software*.
-- **Retrieval-Augmented Generation**: Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*.
-- **Piotroski F-Score**: Piotroski, J.D. (2000). *Value Investing: The Use of Historical Financial Statement Information to Separate Winners from Losers*.
+4. **Agent Summarizer**
+
+   - Dynamically shortens conversation context and prior reports to keep tokens within bounds.
+
+5. **Chain of Responsibility**
+
+   - Orchestrates calls among agents in a **linear** yet **modular** pipeline, letting you easily add new steps.
+
+6. **User-Friendly**
+   - Built on Streamlit for an intuitive UI. Prompts for API keys at runtime, offers model dropdowns, and supports easy **risk profile** downloads.
+
+---
+
+## 4. Dependencies
+
+- **Python 3.7+**
+- **Streamlit** for UI
+- **Pandas** for CSV handling
+- **YFinance** for real-time stock data
+- **LLMWare Library** (handles LLM prompt management)
+- **OpenAI** or **Anthropic** API Key
+
+---
+
+## 5. Setup Instructions
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/yourusername/ava-1.7.git
+   cd ava-1.7
+   ```
+
+2. **Create a Virtual Environment**
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   # Windows: venv\Scripts\activate
+   ```
+
+3. **Install Dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure API Key**
+
+   - Obtain an OpenAI or Anthropic key and keep it ready. The app prompts you at runtime.
+
+5. **Run the Application**
+   ```bash
+   streamlit run main.py
+   ```
+
+---
+
+## 6. Usage Instructions
+
+1. **Launch the App**
+   - Running `streamlit run main.py` opens the UI in your browser.
+2. **Enter Your API Key**
+   - When prompted, provide the key for your selected model (e.g., GPT-4).
+3. **Select Agent Models**
+   - Configure which model is used for Agent Zero, One, and Two, plus the summarizer, via dropdowns.
+4. **Interact**
+   - Type in the chat. **Agent Zero** responds with equity investment advice or data from other agents.
+5. **Risk Profile**
+   - If you answer risk-related questions, **Agent Two** returns a structured JSON risk profile.
+   - Download your risk profile using the **“Download”** button once generated.
+6. **Charting & Fundamentals**
+   - Ask about a stock’s price or fundamentals to see real-time data from yfinance.
+
+---
+
+## 7. Customization
+
+- **Add New Agents**: Subclass `AgentBase` in `agents/`, create a new mandate in `prompts/`, then integrate in `main.py`.
+- **Edit Mandates**: The `.txt` prompt files define each agent’s instructions (very easy to tweak).
+- **Adjust Pipeline**: The `main.py` user input processing flow can be modified to skip or reorder agent calls.
+
+---
+
+## 8. Limitations
+
+- **LLM-Dependent**: Responses are bound by the chosen LLM’s reliability and knowledge cutoffs.
+- **Equity-Focused**: Currently specialized in **publicly listed stocks**—other asset classes (e.g., bonds, crypto) are not covered.
+- **Data Delays**: Real-time market data from Yahoo Finance may have slight latency or partial data.
+
+---
+
+## 9. Ethical Considerations
+
+- **Informational Purposes Only**: AVA 1.7’s recommendations are **not** financial advice—always consult a qualified professional.
+- **User Privacy**: Be mindful when sharing sensitive investment info via the chat.
+
+---
+
+## 10. Future Work
+
+- **Enhanced Summaries**: Expand the Summarizer to handle multiple conversation segments and advanced compression.
+- **Automated KYC**: Integrate optional compliance checks.
+- **Multi-Asset Support**: Extend beyond equities to cover ETFs, bonds, or mutual funds.
+- **Fine-Tuned LLM**: Incorporate domain-specific LLM models for more accurate analysis.
+
+---
+
+## 11. References
+
+- **Gamma, E. et al. (1994)**. _Design Patterns: Elements of Reusable Object-Oriented Software._
+- **Lewis, P. et al. (2020)**. _Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks._
+- **Piotroski, J.D. (2000)**. _Value Investing: The Use of Historical Financial Statement Information to Separate Winners from Losers._

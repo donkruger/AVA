@@ -349,32 +349,50 @@ if user_input:
             )
             return assistant_response
 
-        elif 'investment_advice' in evaluation_dict and 'R' in evaluation_dict['investment_advice']:
-            # User answered a risk profile question
-            risk_profile_report = risk_profile_manager.generate_risk_profile(
+        # ===========================================
+        # RISK PROFILE LOGIC
+        # ===========================================
+        if 'investment_advice' in evaluation_dict and 'R' in evaluation_dict['investment_advice']:
+            # User answered a risk profile question -> call AgentTwo
+            raw_risk_profile_report = risk_profile_manager.generate_risk_profile(
                 st.session_state['conversation_history'],
                 agent_two
             )
-            st.session_state['risk_profile_report'] = risk_profile_report
-            st.write(f"**Risk Profile Report from Agent Two:**\n{risk_profile_report}")
-            st.session_state['conversation_history'].append({"role": "agent_two", "content": risk_profile_report})
 
-            report_summaries.append(risk_profile_report)
+            # Store the raw JSON string for display/downloading
+            st.session_state['risk_profile_report'] = raw_risk_profile_report
+
+            # Parse the JSON into a dict for internal usage
+            parsed_profile = risk_profile_manager.parse_risk_profile_report(raw_risk_profile_report)
+            st.session_state['risk_profile_data'] = parsed_profile  # e.g. {'risk_ability': 'medium', 'age': '45'}
+
+            st.write("**Risk Profile Report from Agent Two (Raw JSON):**")
+            st.json(raw_risk_profile_report)
+
+            st.write("**Parsed Risk Profile Data (Dictionary):**")
+            st.write(parsed_profile)
+
+            # Append the raw report to conversation history
+            st.session_state['conversation_history'].append({"role": "agent_two", "content": raw_risk_profile_report})
+
+            report_summaries.append(raw_risk_profile_report)
             st.session_state['report_summaries'] = report_summaries
 
-            # Update the summarized reports
+            # Summarize updated reports
             reports_summary = agent_summarizer.summarize_reports(
                 report_summaries,
                 num_reports=conversation_memory_config.num_reports
             )
 
+            # Pass the raw text to AgentZero if you want
             assistant_response = conversation_manager.conversation(
                 user_input_text,
                 conversation_summary=conversation_summary,
                 reports_summary=reports_summary,
-                risk_profile_report=risk_profile_report
+                risk_profile_report=raw_risk_profile_report
             )
             return assistant_response
+
 
         elif 'investment_advice' in evaluation_dict and 'N' in evaluation_dict['investment_advice']:
             # General conversation
@@ -646,3 +664,12 @@ if user_input:
 
     # Process the user input
     process_user_input(user_input)
+
+# main.py, near the bottom or after the user input is processed
+if st.session_state.get('risk_profile_report'):
+    st.download_button(
+        label="Download Risk Profile (JSON)",
+        data=st.session_state['risk_profile_report'].encode('utf-8'),
+        file_name="risk_profile_report.json",
+        mime="application/json"
+    )
