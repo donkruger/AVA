@@ -26,6 +26,8 @@ Methods:
   user input, and optional data (e.g., report summaries) to produce a well-rounded, personalized response.
 '''
 
+# agents/agent_zero.py
+
 from .agent_base import AgentBase
 import os
 
@@ -34,15 +36,18 @@ class AgentZero(AgentBase):
         with open(os.path.join('prompts', 'agent_zero_mandate.txt'), 'r') as f:
             return f.read()
 
-# agents/agent_zero.py
-
-    def generate_response(self, user_input, report_summary=None, risk_profile_report=None, fundamentals_report=None, price_chart_note=None):
+    def generate_response(self, user_input, conversation_summary=None, reports_summary=None, risk_profile_report=None, fundamentals_report=None, price_chart_note=None, radar_chart_note=None):
         agent_zero_mandate = self.get_mandate()
 
-        # Include report summary and risk profile report if available
-        if report_summary is not None:
-            agent_zero_mandate += f"\nYou have access to the following research report summary:\n{report_summary}\nUse this information to assist the client."
+        # Include conversation summary if available
+        if conversation_summary is not None:
+            agent_zero_mandate += f"\nHere is a summary of your recent conversation:\n{conversation_summary}"
 
+        # Include reports summary if available
+        if reports_summary is not None:
+            agent_zero_mandate += f"\nHere is a summary of recent reports:\n{reports_summary}"
+
+        # Include other reports as before
         if risk_profile_report is not None:
             agent_zero_mandate += f"\nYou have access to the following risk profile report:\n{risk_profile_report}\nUse this information to assist the client."
 
@@ -52,6 +57,10 @@ class AgentZero(AgentBase):
         if price_chart_note is not None:
             agent_zero_mandate += f"\nYou have generated a price chart for the client. {price_chart_note}."
 
+        if radar_chart_note is not None:
+            agent_zero_mandate += f"\nYou have generated a radar chart for the client. {radar_chart_note}."
+
+
         # Prepare conversation input
         conversation_input = f"{agent_zero_mandate}\nClient: {user_input}\n\nAgent Zero:"
 
@@ -59,5 +68,3 @@ class AgentZero(AgentBase):
         response = self.prompter.prompt_main(conversation_input)
         llm_response = response['llm_response'].strip()
         return llm_response
-
-

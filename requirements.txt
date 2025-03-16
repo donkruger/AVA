@@ -5,3 +5,5 @@ yfinance
 openai
 anthropic
 streamlit-lottie
+streamlit-mic-recorder
+plotly

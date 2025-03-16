@@ -26,6 +26,8 @@ Methods:
   which classifies and refines the input for further processing by other agents.
 '''
 
+# agents/agent_one.py
+
 from .agent_base import AgentBase
 import os
 
@@ -34,8 +36,13 @@ class AgentOne(AgentBase):
         with open(os.path.join('prompts', 'agent_one_mandate.txt'), 'r') as f:
             return f.read()
 
-    def evaluate_input(self, user_input):
+    def evaluate_input(self, user_input, conversation_summary=None):
         evaluation_mandate = self.get_mandate()
+
+        # Include conversation summary if provided
+        if conversation_summary is not None:
+            evaluation_mandate += f"\n\nHere is a summary of the conversation history:\n{conversation_summary}"
+
         evaluation_input = f"{evaluation_mandate}\n\nUser input: {user_input}"
         response = self.prompter.prompt_main(evaluation_input)
         llm_response = response['llm_response'].strip()

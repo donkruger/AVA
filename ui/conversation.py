@@ -22,6 +22,11 @@ def initialize_conversation():
     if 'price_chart_data' not in st.session_state:
         st.session_state['price_chart_data'] = None
 
+    if 'radar_chart_data' not in st.session_state:
+        st.session_state['radar_chart_data'] = None
+    if 'radar_chart_note' not in st.session_state:
+        st.session_state['radar_chart_note'] = None
+
 def display_conversation():
     """
     Displays the conversation history in the Streamlit app.

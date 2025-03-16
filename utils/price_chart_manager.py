@@ -35,3 +35,29 @@ class PriceChartManager:
         except Exception as e:
             return None, None, f"An error occurred while fetching data for {ticker_symbol}: {e}"
 
+    def get_comparative_price_data(self, ticker_symbols, period='1mo'):
+        if not ticker_symbols or len(ticker_symbols) < 2:
+            return None, "Please provide two or more stock tickers to compare."
+
+        combined_data = pd.DataFrame()
+
+        for ticker in ticker_symbols:
+            try:
+                stock = yf.Ticker(ticker)
+                historical_data = stock.history(period=period)
+                if historical_data.empty:
+                    return None, f"No data found for {ticker} over the period {period}."
+
+                # Calculate relative performance
+                # Normalize the 'Close' prices to start at 100, reflecting relative performance vs. the first day.
+                start_price = historical_data['Close'].iloc[0]
+                historical_data['Relative_Performance'] = (historical_data['Close'] / start_price) * 100
+
+                # Add this relative performance series to the combined dataframe
+                combined_data[ticker.upper()] = historical_data['Relative_Performance']
+
+            except Exception as e:
+                return None, f"An error occurred while fetching data for {ticker}: {e}"
+
+        return combined_data, None
+

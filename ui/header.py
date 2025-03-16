@@ -50,4 +50,4 @@ def display_header():
         st_lottie(lottie_loader, height=100, width=100, key="title_loader")  # Display the Lottie animation
 
     with col2:
-        st.markdown('<h1 class="custom-title">Agentic Investment Advice</h1>', unsafe_allow_html=True)  # Custom styled title
+        st.markdown('<h1 class="custom-title">Agentic Investment Insights</h1>', unsafe_allow_html=True)  # Custom styled title
