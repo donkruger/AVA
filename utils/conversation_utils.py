@@ -33,7 +33,6 @@ class ConversationManager:
         self.agent_summarizer = agent_summarizer
         self.num_messages = num_messages
         self.num_reports = num_reports
-        
 
     def conversation(self, user_input, **kwargs):
         """
